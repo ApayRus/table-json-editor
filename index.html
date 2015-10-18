@@ -5,10 +5,8 @@
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
 	<script type="text/jsx">
-
-
 
 var table_data = {'1': {'a': 'cell a1', 'b': 'cell b1', 'c': 'cell c1'},
                   '2': {'d': 'cell d2', 'e': 'cell e2'},
@@ -23,96 +21,82 @@ var cols_index = "abcdefghijklmnopqrstuvwxyz".split("");
 
 var Table = React.createClass({
 
+getInitialState: function () {
 
+	return {data : table_data, rows_count: 5}
 
+},
 
+handleCellChange: function(event){
+ 
+var new_data = this.state.data;
+var i = event.target.dataset.i; 
+var j = event.target.dataset.j; 
+new_data[i] = new_data[i]? new_data[i] : {}; 
+new_data[i][j] = event.target.value  ;
+if (new_data[i][j]=="") delete new_data[i][j]; 
+if (Object.keys(new_data[i]).length == 0) delete new_data[i]; 
+this.setState({data: new_data}); 
+},
 
-				getInitialState: function () {
+handleChangeRowsInTable: function(event) {
 
-					return {data : table_data, rows_count: 5}
+	this.setState({rows_count: event.target.value})
 
-				},
+}, 
 
-				handleCellChange: function(event){
-				 
-				var new_data = this.state.data;
-				var i = event.target.dataset.i; 
-				var j = event.target.dataset.j; 
+handleTextareaChange: function(event) {
+	
+	if (event.target.value.trim() == "") new_data = {}; 
+	else var new_data = JSON.parse(event.target.value); 
+	this.setState({data: new_data})
 
-				new_data[i] = new_data[i]? new_data[i] : {}; 
-				new_data[i][j] = event.target.value  ;
-				if (new_data[i][j]=="") delete new_data[i][j]; 
-				if (Object.keys(new_data[i]).length == 0) delete new_data[i]; 
+}, 
 
-				this.setState({data: new_data});
-				test = this.state.data; 
-				},
+render: function() {
+	var table = this;
+	var rows_index = []; for (i=1; i<= table.state.rows_count; i++) rows_index.push(i);
 
-				handleChangeRowsInTable: function(event) {
+return (
+		<div>
+			<table>
+	              <thead>
+	                      <th className="row_col_label"></th>
+	                      { cols_index.map(function (j){ return <th key={j}  className="row_col_label">{j}</th> }) }
+	              </thead>
 
-					this.setState({rows_count: event.target.value})
+	              <tbody>
+	                  { 
 
-				}, 
+	                  	rows_index.map(function (i){
+												return <tr key={"row"+i}><td key={i+"0"} className="row_col_label" >{i}</td>{
+													cols_index.map(function(j){
+															var cell_data = (table.state.data.hasOwnProperty(i)&&table.state.data[i].hasOwnProperty(j)) ? table.state.data[i][j] : "";
+															return <td key={j+i}   >
+																				<input className="cell" key={j+i} data-i={i}  data-j={j} type="text"  value={cell_data}  onChange={table.handleCellChange} />
+																			</td>
+													})
+													}</tr>
+											}) }
+	                </tbody>
+	      </table>
 
-				handleTextareaChange: function(event) {
-					
-					if (event.target.value.trim() == "") new_data = {}; 
-					else var new_data = JSON.parse(event.target.value); 
-					
-
-					this.setState({data: new_data})
-
-				}, 
-
-				render: function() {
-					var table = this;
-					var rows_index = []; for (i=1; i<= table.state.rows_count; i++) rows_index.push(i);
-
-			    return (
-						<div>
-							<table>
-					              <thead>
-					                      <th className="row_col_label"></th>
-					                      { cols_index.map(function (j){ return <th key={j}  className="row_col_label">{j}</th> }) }
-					              </thead>
-
-					              <tbody>
-					                  { 
-
-					                  	rows_index.map(function (i){
-																return <tr key={"row"+i}><td key={i+"0"} className="row_col_label" >{i}</td>{
-																	cols_index.map(function(j){
-																			var cell_data = (table.state.data.hasOwnProperty(i)&&table.state.data[i].hasOwnProperty(j)) ? table.state.data[i][j] : "";
-																			return <td key={j+i}   >
-																								<input className="cell" key={j+i} data-i={i}  data-j={j} type="text"  value={cell_data}  onChange={table.handleCellChange} />
-																							</td>
-																	})
-																	}</tr>
-															}) }
-					                </tbody>
-					      </table>
-
-					      				<p>
-
-					      				Display rows: 
-					      				<input className="rows_count" onChange={this.handleChangeRowsInTable} value={this.state.rows_count} type="number" />
-					      				</p>
-										<p>
-										JSON live input/output: <br />
-										<textarea value={JSON.stringify(this.state.data).replace(/},/g, "},\n")} onChange={this.handleTextareaChange} ></textarea>
-										</p>
-							</div>
-						);
-				}
+	      	<p>
+			Display rows: 
+			<input className="rows_count" onChange={this.handleChangeRowsInTable} value={this.state.rows_count} type="number" />
+			</p>
+			<p>
+			JSON live input/output: <br />
+			<textarea value={JSON.stringify(this.state.data).replace(/},/g, "},\n")} onChange={this.handleTextareaChange} ></textarea>
+			</p>
+		</div>
+		);
+}
 
 });
 
 
-
-	React.render(
-		<Table data={table_data} />,
-		document.getElementById("table-container")
-	);
+	React.render( <Table data={table_data} />, document.getElementById("table-container") );
 
 	</script>
 
