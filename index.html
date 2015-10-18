@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script type="text/jsx">
+
+
+
+var table_data = {'1': {'a': 'cell a1', 'b': 'cell b1', 'c': 'cell c1'},
+                  '2': {'d': 'cell d2', 'e': 'cell e2'},
+                  '3': {'f': 'cell f3', 'g': 'cell g3'}
+                };
+
+var data0 = [{key1: 'value1', key2: 'value2'}, {key1: 'value3', key2: 'value4'}] ;
+
+var cols_index = "abcdefghijklmnopqrstuvwxyz".split("");
+
+
+
+var Table = React.createClass({
+
+
+
+
+
+				getInitialState: function () {
+
+					return {data : table_data, rows_count: 5}
+
+				},
+
+				handleCellChange: function(event){
+				 
+				var new_data = this.state.data;
+				var i = event.target.dataset.i; 
+				var j = event.target.dataset.j; 
+
+				new_data[i] = new_data[i]? new_data[i] : {}; 
+				new_data[i][j] = event.target.value  ;
+				if (new_data[i][j]=="") delete new_data[i][j]; 
+				if (Object.keys(new_data[i]).length == 0) delete new_data[i]; 
+
+				this.setState({data: new_data});
+				test = this.state.data; 
+				},
+
+				handleChangeRowsInTable: function(event) {
+
+					this.setState({rows_count: event.target.value})
+
+				}, 
+
+				handleTextareaChange: function(event) {
+					
+					if (event.target.value.trim() == "") new_data = {}; 
+					else var new_data = JSON.parse(event.target.value); 
+					
+
+					this.setState({data: new_data})
+
+				}, 
+
+				render: function() {
+					var table = this;
+					var rows_index = []; for (i=1; i<= table.state.rows_count; i++) rows_index.push(i);
+
+			    return (
+						<div>
+							<table>
+					              <thead>
+					                      <th className="row_col_label"></th>
+					                      { cols_index.map(function (j){ return <th key={j}  className="row_col_label">{j}</th> }) }
+					              </thead>
+
+					              <tbody>
+					                  { 
+
+					                  	rows_index.map(function (i){
+																return <tr key={"row"+i}><td key={i+"0"} className="row_col_label" >{i}</td>{
+																	cols_index.map(function(j){
+																			var cell_data = (table.state.data.hasOwnProperty(i)&&table.state.data[i].hasOwnProperty(j)) ? table.state.data[i][j] : "";
+																			return <td key={j+i}   >
+																								<input className="cell" key={j+i} data-i={i}  data-j={j} type="text"  value={cell_data}  onChange={table.handleCellChange} />
+																							</td>
+																	})
+																	}</tr>
+															}) }
+					                </tbody>
+					      </table>
+
+					      				<p>
+
+					      				Display rows: 
+					      				<input className="rows_count" onChange={this.handleChangeRowsInTable} value={this.state.rows_count} type="number" />
+					      				</p>
+										<p>
+										JSON live input/output: <br />
+										<textarea value={JSON.stringify(this.state.data).replace(/},/g, "},\n")} onChange={this.handleTextareaChange} ></textarea>
+										</p>
+							</div>
+						);
+				}
+
+});
+
+
+
+	React.render(
+		<Table data={table_data} />,
+		document.getElementById("table-container")
+	);
+
+	</script>
+
+</head>
+
+<body>
+
+<div id="table-container"></div>
+</body>
+
+
+
+<style>
+td, th {width: 50px; height: 20px; border: 1px solid lightblue;}
+table {border-collapse: collapse;}
+.row_col_label {text-align: center; background: #eee;}
+input.cell {border: none; }
+textarea {min-width: 600px; min-height: 200px; margin-top: 10px;}
+input.rows_count {width: 50px; margin-left: 50px; }
+</style>
+
+
+</html>
